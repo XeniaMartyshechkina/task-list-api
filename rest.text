@@ -1,0 +1,20 @@
+API contract file:
+
+CREATION:
+Person: POST http://localhost:9090/app/api/persons
+Account for an existing person: POST http://localhost:9090/app/api/persons/{email}/accounts
+Task for an existing account: POST http://localhost:9090/app/api/accounts/{id}/tasks
+
+READ:
+Person with account and tasks: GET http://localhost:9090/app/api/me
+All persons: GET http://localhost:9090/app/api/persons
+Accounts with exact status: GET http://localhost:9090/app/api/accounts?status={status}
+
+UPDATE:
+Block or unblock account: PUT http://localhost:9090/app/api/accounts/{id}/status
+
+Request body:
+{
+  "status": "BLOCKED"
+}
+
