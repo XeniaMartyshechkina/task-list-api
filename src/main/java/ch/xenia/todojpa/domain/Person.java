@@ -30,7 +30,7 @@ public class Person {
     @Column(nullable = false)
     private String passwordHash;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn (nullable = false, name="person_email")
     List<Account> accounts;
 
