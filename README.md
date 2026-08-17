@@ -140,8 +140,6 @@ That means child entities are saved through the parent aggregate instead of bein
 - `EntityNotFoundException` to HTTP `404 Not Found`
 - `EntityExistsException` to HTTP `409 Conflict`
 
-`AiServiceException` exists but is not currently mapped to a custom HTTP response, so OpenAI failures will surface as a generic server error unless you extend the handler.
-
 ## Configuration
 
 Main application properties are in `src/main/resources/application.properties`.
@@ -207,11 +205,9 @@ You need:
 
 - JDK 21
 - a running PostgreSQL instance
-- Maven or IDE support for Spring Boot
+- Maven
 
 ### 3. Configure environment variables
-
-At minimum:
 
 - `OPENAI_API_KEY`
 - `ADMIN_EMAIL`
@@ -234,34 +230,6 @@ Once started, the API is available under:
 ```text
 http://localhost:9090/app
 ```
-
-## Security Notes
-
-The repository contains partial security wiring and it is important to understand what is already implemented versus what still needs to be completed.
-
-### Present in the codebase
-
-- `spring-boot-starter-security` is included
-- passwords are stored using BCrypt
-- an admin `Person` is seeded at startup
-- some endpoints use `@PreAuthorize("hasRole('ADMIN')")`
-- several service methods use `Authentication.getName()` as the current person's email
-
-### Not visible in the current codebase
-
-- no custom `UserDetailsService`
-- no explicit `SecurityFilterChain`
-- no visible database-backed authentication bridge from Spring Security to `Person`
-- no visible `@EnableMethodSecurity` configuration
-
-### Practical implication
-
-The authorization intent is clear, but production-ready authentication is not fully wired in this repository snapshot. Before relying on the API as a secure multi-user system, you should confirm or add:
-
-- how users authenticate
-- how `Person.role` is converted into Spring Security authorities
-- whether method security is enabled for `@PreAuthorize`
-- whether `/api/persons` should be publicly accessible for sign-up or protected behind a different flow
 
 ## API
 
@@ -489,26 +457,11 @@ If you change the task creation contract, this test should usually be updated fi
 - `createAccountForAPerson(...)` and task creation both depend on the authenticated principal name matching a stored `Person.email`.
 - `findAllPersons()` returns all `Person` entities directly.
 - `findAccountsWithStatus(...)` filters accounts using JPQL.
-- Account and task persistence currently rely on relationship cascading instead of explicit `persist(...)` calls for each child entity.
 
 ## Known Gaps and Follow-Up Ideas
 
-- Add a real `UserDetailsService` backed by `Person`.
 - Add an explicit `SecurityFilterChain`.
 - Enable and verify method security for `@PreAuthorize`.
 - Add HTTP-level controller tests.
-- Add explicit handling for `AiServiceException`.
-- Consider DTOs for all read endpoints to avoid exposing entities directly.
 - Consider a fallback strategy when AI output does not match the expected enums.
-- If you want true local in-memory development, add an H2 datasource configuration; the current project still targets PostgreSQL by default.
-
-## Main Source Files
-
-- `src/main/java/ch/xenia/todojpa/service/ToDoPersistenceService.java`
-- `src/main/java/ch/xenia/todojpa/service/TaskPersistenceService.java`
-- `src/main/java/ch/xenia/todojpa/service/AiTaskAnalysisService.java`
-- `src/main/java/ch/xenia/todojpa/web/controller/CreationController.java`
-- `src/main/java/ch/xenia/todojpa/web/controller/RetrievalController.java`
-- `src/main/java/ch/xenia/todojpa/config/AdminInitializer.java`
-- `src/test/java/ch/xenia/todojpa/service/ToDoServiceMockitoTest.java`
 

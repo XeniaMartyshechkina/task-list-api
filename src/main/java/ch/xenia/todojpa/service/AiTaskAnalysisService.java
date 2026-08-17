@@ -43,7 +43,7 @@ public class AiTaskAnalysisService {
                 .stream()
                 .flatMap(choice -> choice.message().content().stream())
                 .findFirst()
-                .orElseThrow(() -> new AiServiceException("No data from available from " + model));
+                .orElseThrow(() -> new AiServiceException("No data available from " + model));
     }
 
 }

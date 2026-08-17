@@ -19,5 +19,11 @@ public class GlobalExceptionHandler {
     public String handleEntityExists(EntityExistsException ex) {
         return ex.getMessage();
     }
+
+    @ExceptionHandler(AiServiceException.class)
+    @ResponseStatus(HttpStatus.BAD_GATEWAY)
+    public String handleAiServiceException(AiServiceException ex) {
+        return ex.getMessage();
+    }
 }
 
