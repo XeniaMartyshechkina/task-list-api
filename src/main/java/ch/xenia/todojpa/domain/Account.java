@@ -19,7 +19,7 @@ public class Account {
     @Column(nullable = false)
     private AccountStatusEnum status;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(nullable = false, name = "account_id")
     private List<Task> tasks;
 
