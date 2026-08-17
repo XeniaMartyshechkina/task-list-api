@@ -199,7 +199,7 @@ CREATE DATABASE todo_jpa;
 CREATE DATABASE todo_jpa_test;
 ```
 
-### 2. Make sure Java 21 and PostgreSQL are available
+### 2. Use Java 21 and PostgreSQL
 
 You need:
 
@@ -207,7 +207,7 @@ You need:
 - a running PostgreSQL instance
 - Maven
 
-### 3. Configure environment variables
+### 3. Configure environment variables (Run → edit configurations → env. variables)
 
 - `OPENAI_API_KEY`
 - `ADMIN_EMAIL`
@@ -460,8 +460,6 @@ If you change the task creation contract, this test should usually be updated fi
 
 ## Known Gaps and Follow-Up Ideas
 
-- Add an explicit `SecurityFilterChain`.
-- Enable and verify method security for `@PreAuthorize`.
 - Add HTTP-level controller tests.
 - Consider a fallback strategy when AI output does not match the expected enums.
 
