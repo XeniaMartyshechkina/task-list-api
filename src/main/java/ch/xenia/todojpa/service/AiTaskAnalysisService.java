@@ -24,10 +24,10 @@ public class AiTaskAnalysisService {
             Task description:
             %s
             Reply with:
-                - Summary: concise one-sentence email-title style summary.
+                - Summary: create a very short task title of 3 to 5 words maximum.
                 - Category: select one from the list: PERSONAL, BUSINESS, HEALTH, OTHER; If category is OTHER,
                 suggest a category (use two words maximum) or leave it as OTHER.
-                - Priority: select one from the list: LOW, MEDIUM, HIGH, CRITICAL.  
+                - Priority: select one from the list: LOW, MEDIUM, HIGH, CRITICAL.
         """.formatted(taskRequest.description());
 
         StructuredChatCompletionCreateParams<TaskElementsFromAi> params = ChatCompletionCreateParams.builder()

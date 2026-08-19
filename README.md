@@ -21,6 +21,7 @@ The project is structured around JPA entities, a service layer, and thin REST co
 - Update account status
 - Retrieve the current person with nested accounts and tasks
 - Query all persons or accounts by status
+- Retrieve accounts with given status
 
 ## Tech Stack
 
@@ -128,8 +129,8 @@ This flow is explicitly validated by `ToDoServiceMockitoTest`, which verifies th
 
 ### Persistence model
 
-- `Person -> Account` uses `@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)` with `person_email` as the join column.
-- `Account -> Task` uses `@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)` with `account_id` as the join column.
+- `Person -> Account` uses `@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)` with `person_email` as the join column.
+- `Account -> Task` uses `@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)` with `account_id` as the join column.
 
 That means child entities are saved through the parent aggregate instead of being persisted independently in the current code path.
 
@@ -137,8 +138,17 @@ That means child entities are saved through the parent aggregate instead of bein
 
 `GlobalExceptionHandler` currently maps:
 
+- `MethodArgumentNotValidException` to HTTP `400 Bad Request`
+  with a comma-separated plain-text list of field validation errors
+- `HttpMessageNotReadableException` to HTTP `400 Bad Request`
+  with `Malformed JSON request`
+- `HttpMediaTypeNotSupportedException` to HTTP `400 Bad Request`
+  with `Content-Type must be application/json`
 - `EntityNotFoundException` to HTTP `404 Not Found`
 - `EntityExistsException` to HTTP `409 Conflict`
+- `AiServiceException` to HTTP `502 Bad Gateway`
+
+All mapped error responses are returned as plain text strings.
 
 ## Configuration
 
@@ -166,7 +176,7 @@ The test profile also uses PostgreSQL:
 
 ### Environment variables
 
-The application expects the following environment variables:
+The application expects the following environment variables (Run → Edit configuration in IntelliJ):
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
@@ -178,18 +188,6 @@ The application expects the following environment variables:
 | `ADMIN_LAST_NAME` | No | Defaults to `admin` |
 | `ADMIN_ADDRESS` | No | Defaults to `Geneva` |
 
-### Example PowerShell environment setup
-
-```powershell
-$env:OPENAI_API_KEY="your-openai-api-key"
-$env:OPENAI_MODEL="gpt-5.6-luna"
-$env:ADMIN_EMAIL="admin@example.com"
-$env:ADMIN_PASSWORD="Admin12345"
-$env:ADMIN_FIRST_NAME="System"
-$env:ADMIN_LAST_NAME="Admin"
-$env:ADMIN_ADDRESS="Geneva"
-```
-
 ## Local Setup
 
 ### 1. Create PostgreSQL databases
@@ -199,7 +197,7 @@ CREATE DATABASE todo_jpa;
 CREATE DATABASE todo_jpa_test;
 ```
 
-### 2. Use Java 21 and PostgreSQL
+### 2. Use Java and PostgreSQL
 
 You need:
 
@@ -311,7 +309,7 @@ Response example:
 ```json
 {
   "id": 1,
-  "summary": "Implement role-based access control",
+  "summary": "Implement Role-Based Access Control",
   "description": "Implement role-based access control in the Spring Boot application using Spring Security.",
   "status": "TO_DO",
   "category": "BUSINESS",
@@ -378,7 +376,7 @@ Response example:
       "tasks": [
         {
           "id": 1,
-          "summary": "Implement role-based access control",
+          "summary": "Implement Role-Based Access Control",
           "description": "Implement role-based access control in the Spring Boot application using Spring Security.",
           "status": "TO_DO",
           "category": "BUSINESS",
@@ -449,17 +447,8 @@ What it verifies:
 - the mapped task is passed to `TaskPersistenceService.persistTask(...)`
 - the returned task is not null and preserves the original description
 
-If you change the task creation contract, this test should usually be updated first because it captures the orchestration behavior without requiring a running database.
-
-## Useful Implementation Notes
-
-- `createPerson(...)` rejects duplicate emails with `409 Conflict`.
-- `createAccountForAPerson(...)` and task creation both depend on the authenticated principal name matching a stored `Person.email`.
-- `findAllPersons()` returns all `Person` entities directly.
-- `findAccountsWithStatus(...)` filters accounts using JPQL.
-
 ## Known Gaps and Follow-Up Ideas
 
 - Add HTTP-level controller tests.
 - Consider a fallback strategy when AI output does not match the expected enums.
-
+- Test for a task priority update by admin.
